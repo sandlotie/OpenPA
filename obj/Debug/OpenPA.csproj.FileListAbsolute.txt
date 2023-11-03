@@ -10,3 +10,15 @@ C:\Users\spqrr\Documents\GitHub\OpenPA\obj\Debug\OpenPA.dll
 C:\Users\spqrr\Documents\GitHub\OpenPA\obj\Debug\refint\OpenPA.dll
 C:\Users\spqrr\Documents\GitHub\OpenPA\obj\Debug\OpenPA.pdb
 C:\Users\spqrr\Documents\GitHub\OpenPA\obj\Debug\ref\OpenPA.dll
+C:\Users\barbarian\Source\Repos\OpenPA\bin\Debug\OpenPA.deps.json
+C:\Users\barbarian\Source\Repos\OpenPA\bin\Debug\OpenPA.dll
+C:\Users\barbarian\Source\Repos\OpenPA\bin\Debug\OpenPA.pdb
+C:\Users\barbarian\Source\Repos\OpenPA\obj\Debug\OpenPA.csproj.AssemblyReference.cache
+C:\Users\barbarian\Source\Repos\OpenPA\obj\Debug\OpenPA.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\barbarian\Source\Repos\OpenPA\obj\Debug\OpenPA.AssemblyInfoInputs.cache
+C:\Users\barbarian\Source\Repos\OpenPA\obj\Debug\OpenPA.AssemblyInfo.cs
+C:\Users\barbarian\Source\Repos\OpenPA\obj\Debug\OpenPA.csproj.CoreCompileInputs.cache
+C:\Users\barbarian\Source\Repos\OpenPA\obj\Debug\OpenPA.dll
+C:\Users\barbarian\Source\Repos\OpenPA\obj\Debug\refint\OpenPA.dll
+C:\Users\barbarian\Source\Repos\OpenPA\obj\Debug\OpenPA.pdb
+C:\Users\barbarian\Source\Repos\OpenPA\obj\Debug\ref\OpenPA.dll

@@ -12,7 +12,7 @@
 		<DebugType>None</DebugType>
 		<AssemblyName>$(SolutionName)</AssemblyName>
 		<RootNamespace>$(SolutionName)</RootNamespace>
-		<BepInEx>$(AppData)\r2modmanPlus-local\GTFO\profiles\$(Profile)\BepInEx</BepInEx>
+		<BepInEx>$(AppData)\r2modmanPlus-local\GTFO\profiles\myprofile\BepInEx</BepInEx>
 		<BuildDirectory>$(BepInEx)\plugins\$(SolutionName)\</BuildDirectory>
 		<OutputPath>$(BuildDirectory)</OutputPath>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>

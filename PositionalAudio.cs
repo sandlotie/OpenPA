@@ -1,5 +1,7 @@
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
+using System.IO.MemoryMappedFiles;
+using System.Text;
 using UnityEngine;
 
 namespace PositionalAudio
@@ -11,7 +13,7 @@ namespace PositionalAudio
 		private Timer gameStateCheckTimer;
 		private Timer reportingTaskTimer;
 
-		public override void Load()
+        public override void Load()
 		{
 			// Plugin startup logic
 			Log.LogInfo($"Plugin is loaded!");
@@ -48,8 +50,8 @@ namespace PositionalAudio
 
 				// Start the ReportingTask every second
 				reportingTaskTimer = new Timer(FixedUpdated, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(12));
-			}
-			else
+            }
+            else
 			{
 				// Important for debugging in development builds.
 				Log.LogInfo($"Currently not in level. Reattempting.. ({cState})");
@@ -67,92 +69,140 @@ namespace PositionalAudio
 
 		private unsafe void FixedUpdated(object state)
 		{
-			// Set Current GameState.
-			var cState = GameStateManager.CurrentStateName.ToString();
-
-			// Check if Player left the expedition to prevent game crashing.
-			if (cState != "Generating" && cState != "ReadyToStopElevatorRide" && cState != "StopElevatorRide" && cState != "ReadyToStartLevel" && cState != "InLevel")
+			try
 			{
-				Log.LogInfo($"Expedition Aborted, Closing Link Connection.");
-				// Stop sending data to Mumble
-				reportingTaskTimer.Change(Timeout.Infinite, Timeout.Infinite);
+				// Set Current GameState.
+				var cState = GameStateManager.CurrentStateName.ToString();
 
-				// Start checking Gamestate again
-				gameStateCheckTimer = new Timer(CheckGameState, null, TimeSpan.Zero, TimeSpan.FromSeconds(3));
-
-				// Close Mumble Link Connection
-				mumbleLink.Dispose();
-				mumbleLink = null;
-
-				return;
-			}
-
-			// Execute the code to get player variables and output them to the console
-			var character = Player.PlayerManager.GetLocalPlayerAgent();
-			var position = character.EyePosition - new Vector3(0, 1, 0);
-            var ucam = character.FPSCamera;
-
-            // OldCamera
-            //    Transform camera = GameObject.Find("FPSCameraHolder_PlayerLocal(Clone)")?.transform;
-
-			// Convert Vector3 components to strings - Only needed if debug outputs are uncommented.
-			//    string positionString = $"({position.x}, {position.y}, {position.z})";
-			//    Log.LogInfo($"Player Position: {positionString}");
-
-			if (character != null && ucam != null && cState != null)
-			{
-				//   Log.LogInfo($"Everything is set. (!= null).");
-				if (mumbleLink == null)
+				// Check if Player left the expedition to prevent game crashing.
+				if (cState != "Generating" && cState != "ReadyToStopElevatorRide" && cState != "StopElevatorRide" && cState != "ReadyToStartLevel" && cState != "InLevel")
 				{
-					Log.LogInfo($"Initializing Load(). (mumbleLink == null).");
-					Load();
-				}
+					Log.LogInfo($"Expedition Aborted, Closing Link Connection.");
+					// Stop sending data to Mumble
+					reportingTaskTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
-				mumblelib.Frame* frame = mumbleLink.FramePtr();
+					// Start checking Gamestate again
+					gameStateCheckTimer = new Timer(CheckGameState, null, TimeSpan.Zero, TimeSpan.FromSeconds(3));
 
-				if (ucam.Position != null)
-				{
-					frame->fCameraPosition[0] = ucam.Position.x;
-					frame->fCameraPosition[1] = ucam.Position.y;
-					frame->fCameraPosition[2] = ucam.Position.z;
-				}
-
-				if (ucam.Forward != null)
-				{
-					frame->fCameraFront[0] = ucam.Forward.x;
-					frame->fCameraFront[1] = ucam.Forward.y;
-					frame->fCameraFront[2] = ucam.Forward.z;
-				}
-
-				if (position != null)
-				{
-					frame->fAvatarPosition[0] = position.x;
-					frame->fAvatarPosition[1] = position.y;
-					frame->fAvatarPosition[2] = position.z;
-				}
-
-				if (character.Forward != null)
-				{
-					frame->fAvatarFront[0] = character.Forward.x;
-					frame->fAvatarFront[1] = character.Forward.y;
-					frame->fAvatarFront[2] = character.Forward.z;
-				}
-
-				frame->uiTick++;
-			}
-			else
-			{
-				if (mumbleLink != null)
-				{
-					Log.LogInfo($"Closing Link Connection.");
+					// Close Mumble Link Connection
 					mumbleLink.Dispose();
 					mumbleLink = null;
+
 					return;
 				}
-                Log.LogInfo($"An error has occurred.");
+
+				// Execute the code to get player variables and output them to the console
+				var character = Player.PlayerManager.GetLocalPlayerAgent();
+				var position = character.EyePosition - new Vector3(0, 1, 0);
+				var ucam = character.FPSCamera;
+
+				// OldCamera
+				//    Transform camera = GameObject.Find("FPSCameraHolder_PlayerLocal(Clone)")?.transform;
+
+				// Convert Vector3 components to strings - Only needed if debug outputs are uncommented.
+				//    string positionString = $"({position.x}, {position.y}, {position.z})";
+				//    Log.LogInfo($"Player Position: {positionString}");
+
+				if (character != null && ucam != null && cState != null)
+				{
+					//   Log.LogInfo($"Everything is set. (!= null).");
+					if (mumbleLink == null)
+					{
+						Log.LogInfo($"Initializing Load(). (mumbleLink == null).");
+						Load();
+					}
+
+					mumblelib.Frame* frame = mumbleLink.FramePtr();
+
+					if (ucam.Position != null)
+					{
+						frame->fCameraPosition[0] = ucam.Position.x;
+						frame->fCameraPosition[1] = ucam.Position.y;
+						frame->fCameraPosition[2] = ucam.Position.z;
+					}
+
+					if (ucam.Forward != null)
+					{
+						frame->fCameraFront[0] = ucam.Forward.x;
+						frame->fCameraFront[1] = ucam.Forward.y;
+						frame->fCameraFront[2] = ucam.Forward.z;
+					}
+
+					if (position != null)
+					{
+						frame->fAvatarPosition[0] = position.x;
+						frame->fAvatarPosition[1] = position.y;
+						frame->fAvatarPosition[2] = position.z;
+					}
+
+					if (character.Forward != null)
+					{
+						frame->fAvatarFront[0] = character.Forward.x;
+						frame->fAvatarFront[1] = character.Forward.y;
+						frame->fAvatarFront[2] = character.Forward.z;
+					}
+
+					frame->uiTick++;
+
+					// Check if current player is host
+                    if (character.PlayerSlotIndex == 0)
+                    {
+                        ReadMemoryMappedFile();
+                    }
+                }
+				else
+				{
+					if (mumbleLink != null)
+					{
+						Log.LogInfo($"Closing Link Connection.");
+						mumbleLink.Dispose();
+						mumbleLink = null;
+						return;
+					}
+					Log.LogInfo($"An error has occurred.");
+				}
+			} catch (Exception e)
+			{
+                // Needed to avoid a crash when you leave the expedition
+                // TODO: Fix crashes when exiting the expedition
+				// Without calling ReadMemoryMappedFile it doesn't seem to happen.
+                Log.LogWarning($"Something went wrong: {e.Message}");
+			}
+		}
+
+		private void ReadMemoryMappedFile()
+		{
+            var players = Player.PlayerManager.PlayerAgentsInLevel;
+			foreach (Player.PlayerAgent player in players)
+			{
+				// Open memory mapped file for specific player
+				var memoryMappedFileName = $"posaudio_mumlink_{player.PlayerName.ToLower().Replace(" ", "_")}";
+				const int dataSize = 1024;
+				try
+				{
+					using (var mmf = MemoryMappedFile.OpenExisting(memoryMappedFileName))
+					{
+						using (var accessor = mmf.CreateViewAccessor(0, dataSize))
+						{
+							byte[] dataBytes = new byte[dataSize];
+							accessor.ReadArray(0, dataBytes, 0, dataSize);
+							string receivedData = Encoding.UTF8.GetString(dataBytes).TrimEnd('\0');
+							if (receivedData == "Talking")
+							{
+								Log.LogInfo($"From: {player.PlayerName}, Received Data: {receivedData}");
+								player.ForcePlayerNoiseChange(Agents.Agent.NoiseType.Walk);
+							}
+						}
+					}
+				} catch (Exception _)
+				{
+                    // If there is no memory mapping file for a specific player
+                }
+
             }
 		}
-		public interface LinkFileFactory
+
+        public interface LinkFileFactory
 		{
 			LinkFile Open();
 		}

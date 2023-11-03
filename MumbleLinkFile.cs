@@ -8,7 +8,6 @@ namespace mumblelib
 {
     public unsafe class MumbleLinkFile : IDisposable
     {
-
         /// <summary>Holds a reference to the shared memory block.</summary>
         private readonly MemoryMappedFile memoryMappedFile;
 
